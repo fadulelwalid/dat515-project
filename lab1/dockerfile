@@ -1,0 +1,14 @@
+# Use the official Nginx image as a base
+FROM nginx:latest
+
+# Set the maintainer label
+LABEL maintainer="name@example.com"
+
+# Copy static website files to the Nginx web directory
+COPY ./website /usr/share/nginx/html
+
+# Expose port 80 for the web server
+EXPOSE 80
+
+# Default command to run Nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]
