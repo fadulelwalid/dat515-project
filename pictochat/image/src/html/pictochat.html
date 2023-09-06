@@ -45,6 +45,24 @@
 </head>
 
 <body>
+    <script>
+      // Send an HTTP GET request to the "/get_rooms" endpoint using the fetch API.
+      fetch("/get_rooms").then((response) => {
+        // When the response is received, parse it as JSON.
+        return response.json().then((data) => {
+          console.log(data)
+          let roomsList = document.getElementById("rooms-list")
+          for (let i = 0; i < data.length; i++) {
+            let room = document.createElement("a")
+            room.setAttribute("href", "chat/" + data[i].id)
+            room.setAttribute("class", "box-link")
+            room.innerHTML = data[i].name
+            roomsList.appendChild(room)
+          }
+        })
+      })
+    </script>
+
     <div style="padding-bottom: 5%;">
       <h1>PicToChat</h1>
       <h4 style="font-style: italic;">Pick a room (or create a new) to chat!</h4>
@@ -53,9 +71,11 @@
     <button>Create New Room</button>
 
     <div class="available-rooms-list" id="rooms-list">
-      <a href="" class="box-link">Room 1</a>
-      <a href="" class="box-link">Room 2</a>
-      <a href="" class="box-link">Room 3</a>
-    </div>
+    <!--
+      <a href="" class="box-link">FakeRoom 1</a>
+      <a href="" class="box-link">FakeRoom 2</a>
+      <a href="" class="box-link">FakeRoom 3</a>
+    -->
+    </div> 
 </body>
 </html>
