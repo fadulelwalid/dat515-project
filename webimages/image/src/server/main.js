@@ -6,7 +6,7 @@ const server = http.createServer(app)
 
 app.get('/', (req, res) => {
   console.log('deez nutz')
-  res.sendFile('/web/index.html')
+  res.sendFile('/html/index.html')
 })
 
 app.get('/hei', (req, res) => {
