@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicToChat</title>
+    <style>
+        * {
+          font-family: 'Courier New', Courier, monospace;
+          color: antiquewhite;
+        }
+        body {
+          background-color: cadetblue;
+          text-align: center;
+        }
+        button {
+          font-weight: bold;
+          color: black;
+          padding: 12px 24px;
+          font-size: 18px;
+          border-radius: 5px;
+        }
+        /* Style the link container */
+        .available-rooms-list {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding-top: 2%;
+        }
+
+        /* Style the links to look like boxes */
+        .box-link {
+          display: block;
+          padding: 10px; /* Adjust padding to control the box size */
+          width: 60%;
+          margin: 10px;
+          text-align: center;
+          text-decoration: none;
+          background-color: #3498db; /* Background color */
+          border: 2px solid antiquewhite; /* Border style */
+          border-radius: 5px; /* Rounded corners */
+          transition: background-color 0.3s, transform 0.3s; /* Add a smooth transition effect */
+        }
+      </style>
+</head>
+
+<body>
+    <div style="padding-bottom: 5%;">
+      <h1>PicToChat</h1>
+      <h4 style="font-style: italic;">Pick a room (or create a new) to chat!</h4>
+    </div>
+
+    <button>Create New Room</button>
+
+    <div class="available-rooms-list" id="rooms-list">
+      <a href="" class="box-link">Room 1</a>
+      <a href="" class="box-link">Room 2</a>
+      <a href="" class="box-link">Room 3</a>
+    </div>
+</body>
+</html>
