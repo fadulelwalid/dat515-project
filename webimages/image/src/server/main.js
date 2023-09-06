@@ -1,8 +1,18 @@
 const express = require('express')
 const app = express()
-const mysql = require('mysql')
+const mysql = require('mysql2')
 const http = require('http')
 const server = http.createServer(app)
+
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root"
+});
+
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
 
 app.get('/', (req, res) => {
   console.log('deez nutz')
