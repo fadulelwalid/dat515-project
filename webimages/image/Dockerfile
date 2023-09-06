@@ -1,5 +1,6 @@
 FROM node:1.0
-COPY files/ /web/
-WORKDIR /web
+COPY ../../src/html /html/
+COPY ../../src/server /server/
+WORKDIR /server/
 EXPOSE 80
-CMD ["node", "/web/main.js"]
+CMD ["node", "/server/main.js"]
