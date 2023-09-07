@@ -4,6 +4,27 @@ const mysql = require('mysql2')
 const http = require('http')
 const server = http.createServer(app)
 /*
+//MyFuck funtion for testing connection to database
+function myFuck(){
+  
+  var con = mysql.createConnection({
+    host: "mysql",
+    user: "root",
+    password: "Password"
+  });
+
+
+  con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+  });
+}
+setTimeout(myFuck, 5000, "fucky")
+
+
+
+
+
 var dbConnection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -54,3 +75,5 @@ app.get('/pictochat', (req, res) => {
 server.listen(80, () => {
   console.log('listening on *:80')
 })
+
+
