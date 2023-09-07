@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  noot:
+    build:
+      context: node_image/
+      dockerfile: Dockerfile
+    image: noot:1.0
+
+  app:
+    depends_on:
+      - noot
+      - mysql
+    restart: always
+    build:
+      context: image/
+      dockerfile: Dockerfile
+    image: image:1.0
+    ports:
+      - 80:80
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Password
+      MYSQL_DB: todos
+
+  mysql:
+    image: mysql:latest
+    volumes:
+      - type: volume
+        source: mysql-data
+        target: /var/lib/mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: Password
+      MYSQL_DATABASE: todos
+
+volumes:
+  mysql-data:
+
