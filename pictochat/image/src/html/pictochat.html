@@ -13,9 +13,11 @@
           background-color: cadetblue;
           text-align: center;
         }
-        button {
+        
+        #button {
           font-weight: bold;
           color: black;
+          height: 100px;
           padding: 12px 24px;
           font-size: 18px;
           border-radius: 5px;
@@ -68,7 +70,10 @@
       <h4 style="font-style: italic;">Pick a room (or create a new) to chat!</h4>
     </div>
 
-    <button>Create New Room</button>
+    <form action="/create_room" method="POST">
+      <input id="button" name="room" type="text" placeholder="room name...">
+      <input id="button" type="submit" value="Create New Room">
+    </form>
 
     <div class="available-rooms-list" id="rooms-list">
     <!--

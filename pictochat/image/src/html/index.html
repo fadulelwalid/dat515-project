@@ -8,13 +8,13 @@
       }
       body {
         background-color: cadetblue;
-        text-align: center;
         color: antiquewhite;
       }
       div {
-        padding-top: 25%;
-        padding-left: 40%;
-        padding-right: 40%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       input {
         border-radius: 5px;
@@ -29,8 +29,10 @@
     <div>
       <h1>SIGN IN TO CHAT</h1>
       <!-- <form action="" id="username"></form> -->
-      <input type="text" placeholder="username...">
-      <button type="submit">Sign in</button>
+      <form action="/signin" method="POST">
+        <input id="username" name="username" type="text" placeholder="username...">
+        <input type="submit" value="Sign in">
+      </form>
     </div>
   </body>
 </html>
