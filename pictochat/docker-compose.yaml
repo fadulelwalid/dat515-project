@@ -6,6 +6,8 @@ services:
       context: node_image/
       dockerfile: Dockerfile
     image: noot:1.0
+    profiles:
+      - donotstart
 
   app:
     depends_on:
