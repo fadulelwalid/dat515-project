@@ -3,46 +3,46 @@ const app = express()
 const mysql = require('mysql2')
 const http = require('http')
 const server = http.createServer(app)
-/*
-//MyFuck funtion for testing connection to database
-function myFuck(){
-  
-  var con = mysql.createConnection({
-    host: "mysql",
-    user: "root",
-    password: "Password"
-  });
 
+const sql_create_tables = `
+CREATE TABLE IF NOT EXISTS rooms (
+  id int NOT NULL PRIMARY KEY AUTOINCREMENT
+  name varchar(256)
+);
 
-  con.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-  });
-}
-setTimeout(myFuck, 5000, "fucky")
+CREATE TABLE IF NOT EXISTS users (
+  id int NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name varchar(256),
+  in_room int,
+  FOREIGN KEY (in_room) REFERENCES rooms(id)
+);
 
+CREATE TABLE IF NOT EXISTS photo (
+  id int NOT NULL PRIMARY KEY AUTOINCREMENT,
+  creator int NOT NULL,
+  FOREIGN KEY (creator) REFERENCES users(id)
+);
+`
 
-
-
-
-var dbConnection = mysql.createConnection({
-  host: "localhost",
+var con = mysql.createConnection({
+  host: "mysql",
   user: "root",
-  password: "DAT515_0707",
-  database: "image", // Usikker på om dette er riktig
-});
+  password: "Password"
+})
 
-// Connect to MySQL
-dbConnection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-    return;
-  }
-  console.log('Connected to MySQL');
-});
-*/
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+
+  con.query(sql_create_tables, function (err, result) {
+    if (err) throw err;
+    console.log("Result: " + result);
+  });
+})
 
 app.get('/get_rooms', (req, res) => {
+
+
 
   rooms = [
     {
