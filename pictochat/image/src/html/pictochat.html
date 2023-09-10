@@ -48,6 +48,11 @@
 
 <body>
     <script>
+      const urlParams = new URLSearchParams(document.URL);
+      const user = urlParams.get('user')
+
+      console.log("user: ", user)
+
       // Send an HTTP GET request to the "/get_rooms" endpoint using the fetch API.
       fetch("/get_rooms").then((response) => {
         // When the response is received, parse it as JSON.
@@ -56,7 +61,7 @@
           let roomsList = document.getElementById("rooms-list")
           for (let i = 0; i < data.length; i++) {
             let room = document.createElement("a")
-            room.setAttribute("href", "chat/" + data[i].id)
+            room.setAttribute("href", `room?user=${user}&room=${data[i].name}`)
             room.setAttribute("class", "box-link")
             room.innerHTML = data[i].name
             roomsList.appendChild(room)

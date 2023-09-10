@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>in room</title>
+      <style>
+        #canvas-frame {
+          padding: 1px;
+          background-color: red;
+          width: 512px;
+          height: 512px;
+        };
+      </style>
+  </head>
+  <body>
+    <div class="user-list" id="user-list">
+    </div>
+    <p id="room-name">room name: </p>
+    <div id="canvas-frame"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+
+      const canvas = document.createElement("canvas")
+      canvas.height = 512
+      canvas.width = 512
+      const ctx = canvas.getContext("2d")
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, 512, 512);
+      document.getElementById("canvas-frame").appendChild(canvas)
+
+
+      const urlParams = new URLSearchParams(document.URL);
+      const user = urlParams.get('user')
+      const room = urlParams.get('room')
+      console.log("user: ", user)
+      console.log("room: ", room)
+      
+      socket.emit('join_room', user + "," + room);
+
+
+      /*fetch(`/get_room?room=${room}`).then((response) => {
+        return response.json().then((data) => {
+          console.log(data)
+          let usersList = document.getElementById("users-list")
+          for (let i = 0; i < data.length; i++) {
+            let room = document.createElement("p")
+            room.innerHTML = data[i].name
+            usersList.appendChild(room)
+          }
+        })
+      })*/
+    </script>
+  </body>
+</html>
