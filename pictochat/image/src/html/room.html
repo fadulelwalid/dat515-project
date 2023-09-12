@@ -22,7 +22,6 @@
     <script>
       const socket = io();
 
-
       const canvas = document.createElement("canvas")
       canvas.height = 512
       canvas.width = 512
@@ -31,16 +30,33 @@
       ctx.fillRect(0, 0, 512, 512);
       document.getElementById("canvas-frame").appendChild(canvas)
 
-
-      const urlParams = new URLSearchParams(document.URL);
+      const urlParams = new URL(document.URL).searchParams;
       const user = urlParams.get('user')
       const room = urlParams.get('room')
       console.log("user: ", user)
       console.log("room: ", room)
-      
+
+      document.getElementById("room-name").innerHTML = "room name: " + room
+
       socket.emit('join_room', user + "," + room);
 
+      socket.on("users", function(users) {
+        console.log(users)
+        const users2 = document.getElementById("user-list")
 
+        let user_elements = new Array(users.length)
+
+        for (let i = 0; i < users.length; i++) {
+          let user_element = document.createElement("p")
+          user_element.appendChild(document.createTextNode(users[i].name))
+          console.log(users[i])
+          user_elements[i] = user_element
+        }
+
+        users2.replaceChildren(...user_elements)
+
+        console.log(users)
+      })
       /*fetch(`/get_room?room=${room}`).then((response) => {
         return response.json().then((data) => {
           console.log(data)

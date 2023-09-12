@@ -14,7 +14,7 @@
           text-align: center;
         }
         
-        #button {
+        #button, #room {
           font-weight: bold;
           color: black;
           height: 100px;
@@ -47,36 +47,14 @@
 </head>
 
 <body>
-    <script>
-      const urlParams = new URLSearchParams(document.URL);
-      const user = urlParams.get('user')
-
-      console.log("user: ", user)
-
-      // Send an HTTP GET request to the "/get_rooms" endpoint using the fetch API.
-      fetch("/get_rooms").then((response) => {
-        // When the response is received, parse it as JSON.
-        return response.json().then((data) => {
-          console.log(data)
-          let roomsList = document.getElementById("rooms-list")
-          for (let i = 0; i < data.length; i++) {
-            let room = document.createElement("a")
-            room.setAttribute("href", `room?user=${user}&room=${data[i].name}`)
-            room.setAttribute("class", "box-link")
-            room.innerHTML = data[i].name
-            roomsList.appendChild(room)
-          }
-        })
-      })
-    </script>
-
     <div style="padding-bottom: 5%;">
       <h1>PicToChat</h1>
       <h4 style="font-style: italic;">Pick a room (or create a new) to chat!</h4>
     </div>
 
     <form action="/create_room" method="POST">
-      <input id="button" name="room" type="text" placeholder="room name...">
+      <input id="room" name="room" type="text" placeholder="room name...">
+      <input id="user" name="user" type="hidden" value="error">
       <input id="button" type="submit" value="Create New Room">
     </form>
 
@@ -86,6 +64,32 @@
       <a href="" class="box-link">FakeRoom 2</a>
       <a href="" class="box-link">FakeRoom 3</a>
     -->
-    </div> 
+    </div>
+
+    <script>
+      const urlParams = new URL(document.URL).searchParams;
+      const user = urlParams.get('user')
+
+      console.log("user: ", user)
+
+      var user_tag = document.getElementById("user")
+      user_tag.value = user
+
+      console.log(user_tag.value)
+
+      fetch("/get_rooms").then((response) => {
+        return response.json().then((data) => {
+          console.log(data)
+          let roomsList = document.getElementById("rooms-list")
+          for (let i = 0; i < data.length; i++) {
+            let room = document.createElement("a")
+            room.setAttribute("href", `/room?user=${user}&room=${data[i].name}`)
+            room.setAttribute("class", "box-link")
+            room.innerHTML = data[i].name
+            roomsList.appendChild(room)
+          }
+        })
+      })
+    </script>
 </body>
 </html>

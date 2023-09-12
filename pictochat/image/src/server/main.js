@@ -8,8 +8,6 @@ const http = require('http')
 const server = http.createServer(app)
 const io = new Server(server);
 
-// semicolon y u no work D:<
-// https://knowyourmeme.com/memes/y-u-no-guy
 const sql_create_tables = [`
   CREATE TABLE IF NOT EXISTS rooms (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -19,7 +17,7 @@ const sql_create_tables = [`
   CREATE TABLE IF NOT EXISTS users (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
     name varchar(256) UNIQUE,
-    in_room int,
+    in_room int NULL,
     FOREIGN KEY (in_room) REFERENCES rooms(id)
   );
 `,`
@@ -53,26 +51,28 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.post('/signin', (req, res) => {
-  con.query("SELECT name FROM users WHERE (users.name = ?)", req.body.username, function (err, result) {
+  con.query("SELECT name FROM users WHERE (users.name = ?);", req.body.user, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
-      con.query("INSERT INTO users (name) VALUES (?)", req.body.username, function (err, result) {
+      con.query("INSERT INTO users (name) VALUES (?);", req.body.user, function (err, result) {
         if (err) throw err
-        res.redirect(`/pictochat?name=${req.body.username}`)
+        res.redirect(`/pictochat?user=${req.body.user}`)
       })
     } else {
-      res.redirect(`/pictochat?name=${req.body.username}`)
+      res.redirect(`/pictochat?user=${req.body.user}`)
     }
   })
 })
 
 app.post('/create_room', (req, res) => {
-  con.query("SELECT name FROM rooms WHERE (rooms.name = ?)", req.body.room, function (err, result) {
+  console.log(req.body)
+  console.log(req.body.user)
+  con.query("SELECT name FROM rooms WHERE (rooms.name = ?);", req.body.room, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
-      con.query("INSERT INTO rooms (name) VALUES (?)", req.body.room, function (err, result) {
+      con.query("INSERT INTO rooms (name) VALUES (?);", req.body.room, function (err, result) {
         if (err) throw err
-        res.redirect(`/room?name=${req.query.name}&room=${req.body.room}`)
+        res.redirect(`/room?user=${req.body.user}&room=${req.body.room}`)
       })
     } else {
       res.send(`room ${req.body.room} already exists`)
@@ -81,7 +81,7 @@ app.post('/create_room', (req, res) => {
 })
 
 app.get('/get_rooms', (req, res) => {
-  con.query("SELECT * FROM rooms", function (err, result) {
+  con.query("SELECT * FROM rooms;", function (err, result) {
     if (err) throw err
     res.send(JSON.stringify(result))
   })
@@ -102,17 +102,44 @@ app.get('/pictochat', (req, res) => {
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  let name
-  let room
+  let user = undefined
+  let room = undefined
 
-  socket.on('join_room', (name_n_room) => {
-    name_n_room = name_n_room.split(",")
-    name = name_n_room[0]
-    room = name_n_room[1]
+  socket.on('join_room', (user_n_room) => {
+    user_n_room = user_n_room.split(",")
+    console.log(user_n_room)
+    user = user_n_room[0]
+    room = user_n_room[1]
+
+    socket.join(room)
+
+    con.query("SELECT (id) FROM rooms WHERE (name=?);", room, function(err, result) {
+      if (err) throw err
+      room_id = result[0].id
+
+      con.query("UPDATE users SET in_room = ? WHERE name=?;", [room_id, user], function (err, result) {
+        if (err) throw err
+        con.query("SELECT name FROM users WHERE (in_room=?);", room_id, function(err, result) {
+          if (err) throw err
+          io.in(room).emit("users", result)
+        })
+      })
+    })
+
+    console.log(`user ${user} joins room ${room}`)
   })
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    con.query("UPDATE users SET (in_room=NULL) WHERE (name=NULL);", user, function (err, result) {
+      if (err) throw err
+      con.query("SELECT (id) FROM rooms WHERE (name=?);", room, function(err, result) {
+        room_id = result[0].id
+        con.query("SELECT name FROM users WHERE (in_room=?);", room_id, function(err, result) {
+          if (err) throw err
+          io.in(room).emit("users", result)
+        })
+      })
+    })
   });
 });
 
