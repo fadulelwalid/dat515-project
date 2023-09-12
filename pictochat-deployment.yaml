@@ -25,6 +25,6 @@ spec:
         - name: MYSQL_DB
           value: "todos"
         ports:
-        - containerPort: 80
+        - containerPort: 8080
       imagePullSecrets:
         - name: regcred

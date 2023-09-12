@@ -12,7 +12,7 @@ spec:
   selector:
     app: pictochat
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 80
   externalTrafficPolicy: Cluster
   type: LoadBalancer
