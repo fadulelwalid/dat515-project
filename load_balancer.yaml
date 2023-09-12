@@ -2,6 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: load-service
+  annotations:
+    kubernetes.io/ingress.class: "ingress-nginx-chat"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
 spec:
   selector:
     app: pictochat
