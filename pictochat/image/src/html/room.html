@@ -22,6 +22,30 @@
     <script>
       const socket = io();
 
+      const urlParams = new URL(document.URL).searchParams;
+      const user = urlParams.get('user')
+      const room = urlParams.get('room')
+      console.log("user: ", user)
+      console.log("room: ", room)
+
+      document.getElementById("room-name").replaceChildren(document.createTextNode("room name: " + room))
+
+      socket.emit('join_room', user + "," + room);
+
+      socket.on("users", function(users) {
+
+        let user_elements = new Array(users.length)
+
+        for (let i = 0; i < users.length; i++) {
+          let user_element = document.createElement("p")
+          user_element.appendChild(document.createTextNode(users[i].name))
+          user_elements[i] = user_element
+        }
+
+        const users2 = document.getElementById("user-list")
+        users2.replaceChildren(...user_elements)
+      })
+
       const canvas = document.createElement("canvas")
       canvas.height = 512
       canvas.width = 512
@@ -30,33 +54,59 @@
       ctx.fillRect(0, 0, 512, 512);
       document.getElementById("canvas-frame").appendChild(canvas)
 
-      const urlParams = new URL(document.URL).searchParams;
-      const user = urlParams.get('user')
-      const room = urlParams.get('room')
-      console.log("user: ", user)
-      console.log("room: ", room)
+      function getMousePos(evt) {
+        var rect = evt.target.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
 
-      document.getElementById("room-name").innerHTML = "room name: " + room
+      let path
 
-      socket.emit('join_room', user + "," + room);
-
-      socket.on("users", function(users) {
-        console.log(users)
-        const users2 = document.getElementById("user-list")
-
-        let user_elements = new Array(users.length)
-
-        for (let i = 0; i < users.length; i++) {
-          let user_element = document.createElement("p")
-          user_element.appendChild(document.createTextNode(users[i].name))
-          console.log(users[i])
-          user_elements[i] = user_element
+      let lastx, lasty
+      canvas.onmousedown = function(e)
+      {
+        lastx, lasty = getMousePos(e)
+        path = []
+        path.push([lastx, lasty])
+      }
+      canvas.onmouseup = function(e)
+      {
+        console.log(path)
+        socket.emit("stroke", path)
+        path = []
+      }
+      canvas.onmousemove = function(e)
+      {
+        if (e.buttons !== 0) {
+          let {x, y} = getMousePos(e)
+          ctx.lineCap = "round"
+          ctx.lineWidth = 10
+          ctx.strokeStyle = "black"
+          ctx.beginPath();
+          ctx.moveTo(lastx, lasty);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          lastx = x
+          lasty = y
+          path.push([lastx, lasty])
         }
+      }
 
-        users2.replaceChildren(...user_elements)
+      socket.on("stroke", function(stroke) {
+          ctx.lineCap = "round"
+          ctx.lineWidth = 10
+          ctx.strokeStyle = "black"
+          ctx.beginPath();
+          ctx.moveTo(stroke[0][0], stroke[0][1]);
 
-        console.log(users)
+          for (let i = 1; i < stroke.length; i++)
+            ctx.lineTo(stroke[i][0], stroke[i][1]);
+
+          ctx.stroke();
       })
+
       /*fetch(`/get_room?room=${room}`).then((response) => {
         return response.json().then((data) => {
           console.log(data)
