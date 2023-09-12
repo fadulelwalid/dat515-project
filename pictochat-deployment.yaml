@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pictochat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pictochat
+  template:
+    metadata:
+      labels:
+        app: pictochat
+    spec:
+      containers:
+      - name: pictochat
+        image: ckings00/dat515-pictochat:latest
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_USER
+          value: "me"
+        - name: MYSQL_PASSWORD
+          value: "me"
+        - name: MYSQL_DB
+          value: "todos"
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: regcred

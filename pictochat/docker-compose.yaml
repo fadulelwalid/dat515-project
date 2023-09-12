@@ -5,13 +5,14 @@ services:
     build:
       context: node_image/
       dockerfile: Dockerfile
+      network: host
     image: noot:1.0
-    profiles:
-      - donotstart
+
 
   app:
     depends_on:
       - mysql
+      - noot
     restart: always
     build:
       context: image/
