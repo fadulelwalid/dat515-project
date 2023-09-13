@@ -25,6 +25,7 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: Password
       MYSQL_DB: todos
+      LISTEN_PORT: 80
 
   mysql:
     image: mysql:latest
