@@ -8,14 +8,16 @@ spec:
   defaultBackend: 
     service:
       name: pictochat
-      port: 30255
+      port:
+        number: 30255
   rules:
   - http:
       paths:
         - path: /pictochat
           backend:
             name: pictochat
-            port: 30255
+            port:
+              number:  30255
         - path: /webapp
           backend:
             name: webapp
