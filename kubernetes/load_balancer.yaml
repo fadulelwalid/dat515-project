@@ -12,9 +12,10 @@ spec:
   selector:
     app: pictochat
   ports:
-    - port: 8080
-      targetPort: 80
+    - name: pictochat
+      port: 80
+      targetPort: 30080
   externalTrafficPolicy: Cluster
   type: LoadBalancer
-  externalIPs: 
+  externalIPs:
     - "192.168.7.62"
