@@ -5,15 +5,10 @@ metadata:
   annotations:
     ingress.kubernetes.io/rewrite-target: /
 spec:
-  defaultBackend: 
-    service:
-      name: pictochat
-      port: 
-        number: 30255
   rules:
   - http:
       paths:
-        - path: /pictochat
+        - path: /
           backend:
             name: pictochat
             port:
