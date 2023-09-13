@@ -154,7 +154,7 @@ io.on('connection', (socket) => {
 });
 
 // Start the HTTP server
-server.listen(80, () => {
+server.listen(process.env.LISTEN_PORT, () => {
   console.log('listening on *:80')
 })
 

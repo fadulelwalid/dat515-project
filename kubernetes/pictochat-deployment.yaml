@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: pictochat
-        image: ckings00/dat515-pictochat:latest
+        image: ckings00/dat515-pictochat:1.2
         env:
         - name: MYSQL_HOST
           value: mysql
@@ -24,8 +24,10 @@ spec:
           value: "me"
         - name: MYSQL_DB
           value: "todos"
+        - name: LISTEN_PORT
+          value: "30080"
         ports:
-        - containerPort: 8080
+        - containerPort: 30080
       imagePullSecrets:
         - name: regcred
         livenessProbe:
