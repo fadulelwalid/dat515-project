@@ -17,6 +17,7 @@ const sql_create_tables = [`
   CREATE TABLE IF NOT EXISTS users (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
     name varchar(256) UNIQUE,
+    in_a_room int NULL,
     in_room int NULL,
     FOREIGN KEY (in_room) REFERENCES rooms(id)
   );
@@ -42,7 +43,6 @@ con.connect(function(err) {
   for (const sql_create_table in sql_create_tables) {
     con.query(sql_create_tables[sql_create_table], function (err, result) {
       if (err) throw err
-      console.log("Result: " + result)
     })
   }
 })
@@ -54,7 +54,7 @@ app.post('/signin', (req, res) => {
   con.query("SELECT name FROM users WHERE (users.name = ?);", req.body.user, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
-      con.query("INSERT INTO users (name) VALUES (?);", req.body.user, function (err, result) {
+      con.query("INSERT INTO users (name, in_a_room) VALUES (?, 0);", req.body.user, function (err, result) {
         if (err) throw err
         res.redirect(`/pictochat?user=${req.body.user}`)
       })
@@ -122,9 +122,9 @@ io.on('connection', (socket) => {
       if (err) throw err
       room_id = result[0].id
 
-      con.query("UPDATE users SET in_room = ? WHERE name=?;", [room_id, user], function (err, result) {
+      con.query("UPDATE users SET in_room = ?, in_a_room = 1 WHERE name=?;", [room_id, user], function (err, result) {
         if (err) throw err
-        con.query("SELECT name FROM users WHERE (in_room=?);", room_id, function(err, result) {
+        con.query("SELECT name FROM users WHERE (in_room=? AND in_a_room=1);", room_id, function(err, result) {
           if (err) throw err
           io.in(room).emit("users", result)
         })
@@ -134,12 +134,17 @@ io.on('connection', (socket) => {
     console.log(`user ${user} joins room ${room}`)
   })
 
+  socket.on("stroke", (stroke) => {
+    console.log(stroke)
+    io.in(room).emit("stroke", stroke)
+  })
+
   socket.on('disconnect', () => {
-    con.query("UPDATE users SET (in_room=NULL) WHERE (name=NULL);", user, function (err, result) {
+    con.query("UPDATE users SET in_a_room=0 WHERE (name=?);", user, function (err, result) {
       if (err) throw err
       con.query("SELECT (id) FROM rooms WHERE (name=?);", room, function(err, result) {
         room_id = result[0].id
-        con.query("SELECT name FROM users WHERE (in_room=?);", room_id, function(err, result) {
+        con.query("SELECT name FROM users WHERE (in_room=? AND in_a_room=1);", room_id, function(err, result) {
           if (err) throw err
           io.in(room).emit("users", result)
         })
