@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ms-one-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  defaultBackend: 
+    serviceName: pictochat
+    servicePort: 30255
+  rules:
+  - http:
+      paths:
+        - path: /pictochat
+          backend:
+            serviceName: pictochat
+            servicePort: 30255
+        - path: /webapp
+          backend:
+            serviceName: webapp
+            servicePort: 5678
