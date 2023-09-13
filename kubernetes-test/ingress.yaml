@@ -5,15 +5,18 @@ metadata:
   annotations:
     ingress.kubernetes.io/rewrite-target: /
 spec:
-  paths:
-  - path: /webapp
-    backend:
-      serviceName: webapp
-      servicePort: 5678
-  - path: /pictochat
-    backend:
-      serviceName: pictochat
-      servicePort: 30255
   defaultBackend: 
-    serviceName: pictochat
-    servicePort: 30255
+    service:
+      name: pictochat
+      port: 30255
+  rules:
+  - http:
+      paths:
+        - path: /pictochat
+          backend:
+            name: pictochat
+            port: 30255
+        - path: /webapp
+          backend:
+            name: webapp
+            port: 5678
