@@ -8,7 +8,8 @@ spec:
   defaultBackend: 
     service:
       name: pictochat
-      port: 30255
+      port: 
+        number: 30255
   rules:
   - http:
       paths:
