@@ -91,6 +91,11 @@ app.get('/', (req, res) => {
   res.sendFile('/html/index.html')
 })
 
+app.get('/healthz', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+})
+
 app.get('/room', (req, res) => {
   res.sendFile('/html/room.html')
 })

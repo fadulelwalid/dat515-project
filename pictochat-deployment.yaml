@@ -28,3 +28,9 @@ spec:
         - containerPort: 80
       imagePullSecrets:
         - name: regcred
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
