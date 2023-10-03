@@ -5,6 +5,19 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>in room</title>
       <style>
+        * {
+          font-family: 'Courier New', Courier, monospace;
+          color: antiquewhite;
+        }
+        body {
+          background-color: cadetblue;
+          text-align: center;
+        }
+        div {
+          position: relative;
+          left: 50%;
+          transform: translate(-50%, 0%);
+        }
         #canvas-frame {
           padding: 1px;
           background-color: red;
@@ -14,10 +27,10 @@
       </style>
   </head>
   <body>
-    <div class="user-list" id="user-list">
-    </div>
     <p id="room-name">room name: </p>
     <div id="canvas-frame"></div>
+    <p>user list:</p>
+    <div class="user-list" id="user-list"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -82,7 +95,7 @@
         if (e.buttons !== 0) {
           let {x, y} = getMousePos(e)
           ctx.lineCap = "round"
-          ctx.lineWidth = 10
+          ctx.lineWidth = 3
           ctx.strokeStyle = "black"
           ctx.beginPath();
           ctx.moveTo(lastx, lasty);
@@ -96,7 +109,7 @@
 
       socket.on("stroke", function(stroke) {
           ctx.lineCap = "round"
-          ctx.lineWidth = 10
+          ctx.lineWidth = 3
           ctx.strokeStyle = "black"
           ctx.beginPath();
           ctx.moveTo(stroke[0][0], stroke[0][1]);

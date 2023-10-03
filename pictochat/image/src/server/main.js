@@ -14,13 +14,21 @@ const sql_create_tables = [`
     name varchar(256) UNIQUE
   );
 `,`
-  CREATE TABLE IF NOT EXISTS users (
-    id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name varchar(256) UNIQUE,
-    in_a_room int NULL,
-    in_room int NULL,
-    FOREIGN KEY (in_room) REFERENCES rooms(id)
-  );
+CREATE TABLE IF NOT EXISTS users (
+  id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  name varchar(256) UNIQUE,
+  in_a_room int NULL,
+  in_room int NULL,
+  FOREIGN KEY (in_room) REFERENCES rooms(id)
+);
+`,`
+CREATE TABLE IF NOT EXISTS sockets (
+  id varchar(256) UNIQUE NOT NULL,
+  room_id int NOT NULL,
+  user_id int NOT NULL,
+  FOREIGN KEY (room_id) REFERENCES rooms(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
 `,`
   CREATE TABLE IF NOT EXISTS photo (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -43,6 +51,11 @@ con.connect(function(err) {
   for (const sql_create_table in sql_create_tables) {
     con.query(sql_create_tables[sql_create_table], function (err, result) {
       if (err) throw err
+      if (sql_create_table == 2) {
+        con.query("DELETE FROM sockets", function (err, result) {
+          if (err) throw err
+        })
+      }
     })
   }
 })
@@ -104,6 +117,13 @@ app.get('/pictochat', (req, res) => {
   res.sendFile('/html/pictochat.html')
 })
 
+function broadcast_users(room_id) {
+  con.query("SELECT users.name FROM users, sockets WHERE sockets.room_id=? AND sockets.user_id=users.id;", room_id, function(err, result) {
+    if (err) throw err
+    io.in(room_id).emit("users", result)
+  })
+}
+
 io.on('connection', (socket) => {
   console.log('a user connected');
 
@@ -116,42 +136,62 @@ io.on('connection', (socket) => {
     user = user_n_room[0]
     room = user_n_room[1]
 
-    socket.join(room)
+    console.log(`user ${user} joins room ${room}`)
 
-    con.query("SELECT (id) FROM rooms WHERE (name=?);", room, function(err, result) {
+    con.query("SELECT (id) FROM rooms WHERE name=?;", room, function(err, result) {
       if (err) throw err
-      room_id = result[0].id
 
-      con.query("UPDATE users SET in_room = ?, in_a_room = 1 WHERE name=?;", [room_id, user], function (err, result) {
+      room_id = result[0].id
+      socket.join(room_id)
+
+      con.query("SELECT (id) FROM users WHERE name=?;", user, function(err, result) {
         if (err) throw err
-        con.query("SELECT name FROM users WHERE (in_room=? AND in_a_room=1);", room_id, function(err, result) {
+        user_id = result[0].id
+
+        console.log(room_id, user_id)
+        console.log("lmao")
+
+        con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?);", [socket.id, room_id, user_id], function(err, result) {
           if (err) throw err
-          io.in(room).emit("users", result)
+        });
+
+        con.query("UPDATE users SET in_room = ?, in_a_room = 1 WHERE name=?;", [room_id, user], function (err, result) {
+          if (err) throw err
+          broadcast_users(room_id)
         })
       })
     })
-
-    console.log(`user ${user} joins room ${room}`)
   })
 
   socket.on("stroke", (stroke) => {
     console.log(stroke)
-    io.in(room).emit("stroke", stroke)
+    con.query("SELECT room_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
+      if (err) throw err
+      room_id = result[0].room_id;
+      io.in(room_id).emit("stroke", stroke)
+    })
   })
 
   socket.on('disconnect', () => {
-    con.query("UPDATE users SET in_a_room=0 WHERE (name=?);", user, function (err, result) {
+    con.query("SELECT room_id, user_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
       if (err) throw err
-      con.query("SELECT (id) FROM rooms WHERE (name=?);", room, function(err, result) {
-        room_id = result[0].id
-        con.query("SELECT name FROM users WHERE (in_room=? AND in_a_room=1);", room_id, function(err, result) {
-          if (err) throw err
-          io.in(room).emit("users", result)
+      user_id = result[0].user_id;
+      room_id = result[0].room_id;
+
+      con.query("DELETE FROM sockets WHERE id=?", socket.id, function(err, result) {
+        if (err) throw err
+      })
+
+      con.query("UPDATE users SET in_a_room=0 WHERE (id=?);", user_id, function (err, result) {
+        if (err) throw err
+        con.query("SELECT (id) FROM rooms WHERE (id=?);", room_id, function(err, result) {
+          room_id = result[0].id
+          broadcast_users(room_id)
         })
       })
     })
-  });
-});
+  })
+})
 
 // Start the HTTP server
 server.listen(process.env.LISTEN_PORT, () => {
