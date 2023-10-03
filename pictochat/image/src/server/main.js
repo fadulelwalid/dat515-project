@@ -163,7 +163,7 @@ io.on('connection', (socket) => {
     console.log(socket.id + " disconnected")
     con.query("SELECT room_id, user_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
       if (err) throw err
-      if (result) {
+      if (result[0] === undefined) {
         user_id = result[0].user_id;
         room_id = result[0].room_id;
 
