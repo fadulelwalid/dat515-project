@@ -132,30 +132,35 @@ io.on('connection', (socket) => {
 
     con.query("SELECT (id) FROM rooms WHERE name=?;", room, function(err, result) {
       if (err) throw err
+      if (result[0] !== undefined) {
+        room_id = result[0].id
+        socket.join(room_id)
 
-      room_id = result[0].id
-      socket.join(room_id)
-
-      con.query("SELECT (id) FROM users WHERE name=?;", user, function(err, result) {
-        if (err) throw err
-        user_id = result[0].id
-
-        console.log(room_id, user_id)
-        console.log("lmao")
-
-        con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?);", [socket.id, room_id, user_id], function(err, result) {
+        con.query("SELECT (id) FROM users WHERE name=?;", user, function(err, result) {
           if (err) throw err
-          broadcast_users(room_id)
-        });
-      })
+          if (result[0] !== undefined) {
+            user_id = result[0].id
+
+            console.log(room_id, user_id)
+            console.log("lmao")
+
+            con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?);", [socket.id, room_id, user_id], function(err, result) {
+              if (err) throw err
+              broadcast_users(room_id)
+            });
+          }
+        })
+      }
     })
   })
 
   socket.on("stroke", (stroke) => {
     con.query("SELECT room_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
       if (err) throw err
-      room_id = result[0].room_id;
-      socket.in(room_id).emit("stroke", stroke)
+      if (result[0] !== undefined) {
+        room_id = result[0].room_id;
+        socket.in(room_id).emit("stroke", stroke)
+      }
     })
   })
 
