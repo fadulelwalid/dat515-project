@@ -28,8 +28,6 @@ spec:
           value: "30080"
         ports:
         - containerPort: 30080
-      imagePullSecrets:
-        - name: regcred
         livenessProbe:
           httpGet:
             path: /healthz
