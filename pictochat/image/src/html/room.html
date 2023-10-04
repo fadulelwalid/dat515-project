@@ -33,7 +33,7 @@
     <div class="user-list" id="user-list"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io();
+      const socket = io({transports: ['websocket'], upgrade: false});
 
       const urlParams = new URL(document.URL).searchParams;
       const user = urlParams.get('user')
