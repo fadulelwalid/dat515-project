@@ -1,23 +1,23 @@
-require('dotenv').config();
+require('dotenv').config()
 const express = require('express')
-const { Server } = require('socket.io');
+const { Server } = require('socket.io')
 var bodyParser = require('body-parser')
 const app = express()
 const mysql = require('mysql2')
 const http = require('http')
 const server = http.createServer(app)
-const io = new Server(server);
+const io = new Server(server)
 
 const sql_create_tables = [`
   CREATE TABLE IF NOT EXISTS rooms (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
     name varchar(255) UNIQUE
-  );
+  )
 `,`
 CREATE TABLE IF NOT EXISTS users (
   id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
   name varchar(255) UNIQUE
-);
+)
 `,`
 CREATE TABLE IF NOT EXISTS sockets (
   id varchar(255) UNIQUE NOT NULL,
@@ -25,13 +25,13 @@ CREATE TABLE IF NOT EXISTS sockets (
   user_id int NOT NULL,
   FOREIGN KEY (room_id) REFERENCES rooms(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
-);
+)
 `,`
   CREATE TABLE IF NOT EXISTS photo (
     id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
     creator int NOT NULL,
     FOREIGN KEY (creator) REFERENCES users(id)
-  );
+  )
 `]
 
 var con = mysql.createConnection({
@@ -42,7 +42,7 @@ var con = mysql.createConnection({
 })
 
 con.connect(function(err) {
-  if (err) throw err;
+  if (err) throw err
   console.log("Connected!")
 
   for (const sql_create_table in sql_create_tables) {
@@ -52,14 +52,14 @@ con.connect(function(err) {
   }
 })
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false}))
 
 app.post('/signin', (req, res) => {
-  con.query("SELECT name FROM users WHERE (users.name = ?);", req.body.user, function (err, result) {
+  con.query("SELECT name FROM users WHERE (users.name = ?)", req.body.user, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
-      con.query("INSERT INTO users (name) VALUES (?);", req.body.user, function (err, result) {
+      con.query("INSERT INTO users (name) VALUES (?)", req.body.user, function (err, result) {
         if (err) throw err
         res.redirect(`/pictochat?user=${req.body.user}`)
       })
@@ -72,10 +72,10 @@ app.post('/signin', (req, res) => {
 app.post('/create_room', (req, res) => {
   console.log(req.body)
   console.log(req.body.user)
-  con.query("SELECT name FROM rooms WHERE (rooms.name = ?);", req.body.room, function (err, result) {
+  con.query("SELECT name FROM rooms WHERE (rooms.name = ?)", req.body.room, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
-      con.query("INSERT INTO rooms (name) VALUES (?);", req.body.room, function (err, result) {
+      con.query("INSERT INTO rooms (name) VALUES (?)", req.body.room, function (err, result) {
         if (err) throw err
         res.redirect(`/room?user=${req.body.user}&room=${req.body.room}`)
       })
@@ -86,7 +86,7 @@ app.post('/create_room', (req, res) => {
 })
 
 app.get('/get_rooms', (req, res) => {
-  con.query("SELECT * FROM rooms;", function (err, result) {
+  con.query("SELECT * FROM rooms", function (err, result) {
     if (err) throw err
     res.send(JSON.stringify(result))
   })
@@ -97,8 +97,12 @@ app.get('/', (req, res) => {
 })
 
 app.get('/healthz', (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('OK');
+  con.query("SELECT 1", function(err, result) {
+    if (err) throw err
+  })
+
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('OK')
 })
 
 app.get('/room', (req, res) => {
@@ -110,14 +114,14 @@ app.get('/pictochat', (req, res) => {
 })
 
 function broadcast_users(room_id) {
-  con.query("SELECT users.name FROM users, sockets WHERE sockets.room_id=? AND sockets.user_id=users.id;", room_id, function(err, result) {
+  con.query("SELECT users.name FROM users, sockets WHERE sockets.room_id=? AND sockets.user_id=users.id", room_id, function(err, result) {
     if (err) throw err
     io.in(room_id).emit("users", result)
   })
 }
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('a user connected')
 
   let user = undefined
   let room = undefined
@@ -130,13 +134,13 @@ io.on('connection', (socket) => {
 
     console.log(`user ${user} joins room ${room} as ${socket.id}`)
 
-    con.query("SELECT (id) FROM rooms WHERE name=?;", room, function(err, result) {
+    con.query("SELECT (id) FROM rooms WHERE name=?", room, function(err, result) {
       if (err) throw err
       if (result[0] !== undefined) {
         room_id = result[0].id
         socket.join(room_id)
 
-        con.query("SELECT (id) FROM users WHERE name=?;", user, function(err, result) {
+        con.query("SELECT (id) FROM users WHERE name=?", user, function(err, result) {
           if (err) throw err
           if (result[0] !== undefined) {
             user_id = result[0].id
@@ -144,10 +148,10 @@ io.on('connection', (socket) => {
             console.log(room_id, user_id)
             console.log("lmao")
 
-            con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?);", [socket.id, room_id, user_id], function(err, result) {
+            con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?)", [socket.id, room_id, user_id], function(err, result) {
               if (err) throw err
               broadcast_users(room_id)
-            });
+            })
           }
         })
       }
@@ -155,10 +159,10 @@ io.on('connection', (socket) => {
   })
 
   socket.on("stroke", (stroke) => {
-    con.query("SELECT room_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
+    con.query("SELECT room_id FROM sockets WHERE id=?", socket.id, function(err, result) {
       if (err) throw err
       if (result[0] !== undefined) {
-        room_id = result[0].room_id;
+        room_id = result[0].room_id
         socket.in(room_id).emit("stroke", stroke)
       }
     })
@@ -166,11 +170,11 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(socket.id + " disconnected")
-    con.query("SELECT room_id, user_id FROM sockets WHERE id=?;", socket.id, function(err, result) {
+    con.query("SELECT room_id, user_id FROM sockets WHERE id=?", socket.id, function(err, result) {
       if (err) throw err
       if (result[0] !== undefined) {
-        user_id = result[0].user_id;
-        room_id = result[0].room_id;
+        user_id = result[0].user_id
+        room_id = result[0].room_id
 
         con.query("DELETE FROM sockets WHERE id=?", socket.id, function(err, result) {
           if (err) throw err
