@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: pictochat
-        image: ckings00/dat515-pictochat:1.2
+        image: ckings00/dat515-pictochat:1.5
         env:
         - name: MYSQL_HOST
           value: mysql
@@ -25,12 +25,13 @@ spec:
         - name: MYSQL_DB
           value: "todos"
         - name: LISTEN_PORT
-          value: "30080"
+          value: "3000"
         ports:
-        - containerPort: 30080
+        - containerPort: 3000
+          name: pictochat-port
         livenessProbe:
           httpGet:
             path: /healthz
-            port: 80
+            port: 3000
           initialDelaySeconds: 3
           periodSeconds: 3
