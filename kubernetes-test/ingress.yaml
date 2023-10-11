@@ -9,12 +9,16 @@ spec:
   - http:
       paths:
         - path: /
+          pathType: Prefix
           backend:
-            name: pictochat
-            port:
-              number:  30255
+            service:
+              name: pictochat-service
+              port:
+                number:  3000
         - path: /webapp
+          pathType: Prefix
           backend:
-            name: webapp
-            port:
-              number:  5678
+            service:
+              name: webapp-service
+              port:
+                number:  4000
