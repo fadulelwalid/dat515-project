@@ -16,7 +16,7 @@ spec:
       containers:
       - name: hello-node
         image: registry.k8s.io/e2e-test-images/agnhost:2.39
-        args: ["/agnhost", "netexec", "--http-port=4000"]
+        args: ["netexec", "--http-port=4000"]
         ports:
         - containerPort: 4000
           name: webapp-port
