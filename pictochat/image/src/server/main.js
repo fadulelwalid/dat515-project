@@ -43,7 +43,6 @@ var con = mysql.createConnection({
 
 con.connect(function(err) {
   if (err) throw err
-  console.log("Connected!")
 
   for (const sql_create_table in sql_create_tables) {
     con.query(sql_create_tables[sql_create_table], function (err, result) {
@@ -70,8 +69,6 @@ app.post('/signin', (req, res) => {
 })
 
 app.post('/create_room', (req, res) => {
-  console.log(req.body)
-  console.log(req.body.user)
   con.query("SELECT name FROM rooms WHERE (rooms.name = ?)", req.body.room, function (err, result) {
     if (err) throw err
     if(result.length === 0) {
@@ -121,18 +118,15 @@ function broadcast_users(room_id) {
 }
 
 io.on('connection', (socket) => {
-  console.log('a user connected')
 
   let user = undefined
   let room = undefined
 
   socket.on('join_room', (user_n_room) => {
     user_n_room = user_n_room.split(",")
-    console.log(user_n_room)
     user = user_n_room[0]
     room = user_n_room[1]
 
-    console.log(`user ${user} joins room ${room} as ${socket.id}`)
 
     con.query("SELECT (id) FROM rooms WHERE name=?", room, function(err, result) {
       if (err) throw err
@@ -145,8 +139,6 @@ io.on('connection', (socket) => {
           if (result[0] !== undefined) {
             user_id = result[0].id
 
-            console.log(room_id, user_id)
-            console.log("lmao")
 
             con.query("INSERT INTO sockets (id, room_id, user_id) VALUES (?, ?, ?)", [socket.id, room_id, user_id], function(err, result) {
               if (err) throw err
@@ -169,7 +161,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    console.log(socket.id + " disconnected")
     con.query("SELECT room_id, user_id FROM sockets WHERE id=?", socket.id, function(err, result) {
       if (err) throw err
       if (result[0] !== undefined) {
@@ -187,7 +178,6 @@ io.on('connection', (socket) => {
 
 // Start the HTTP server
 server.listen(process.env.LISTEN_PORT, () => {
-  console.log('listening on *:80')
 })
 
 
