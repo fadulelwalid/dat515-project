@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: pictochat
-        image: ckings00/dat515-pictochat:1.5
+        image: ckings00/dat515-pictochat:1.6
         env:
         - name: MYSQL_HOST
           value: mysql
